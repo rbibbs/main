@@ -330,7 +330,7 @@ function getParent(myTree,goal)
 function commands(myTree,x)
 {
 	var domain = [];
-	var xParent = getParent(tree,x);
+	var xParent = getParent(myTree,x);
 	if(hasParent(myTree,x) && (xParent.children.length > 1))
 	{
 		for(var i = 0; i < xParent.children.length; i++)
@@ -558,8 +558,7 @@ function splitNMCmin(sTree,pTree)
 		}
 	}
 	return vcount;
-};
-/********************
+};/********************
 * Some implementations of EqualSisters (Myrberg 2013)
 * Myrberg introduces this constraint but doesn't actually define 
 * how to count violations if there are more than 2 sisters.
