@@ -120,7 +120,7 @@ function omegafy(word, rcat){
 // conceptually, returns all possible parenthesizations of leaves that don't have a set of parentheses enclosing all of the leaves
 // format: returns an array of parenthesizations, where each parenthesization is an array of children, where each child is
 // either a phi node (with descendant nodes attached) or a leaf
-function gen(leaves, options){
+function gen(leaves, options, rcat){
 	var candidates = [];	//each candidate will be an array of siblings
 	if(!(leaves instanceof Array))
 		throw new Error(leaves+" is not a list of leaves.");	
