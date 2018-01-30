@@ -54,7 +54,7 @@ window.GEN = function(sTree, words, rcat, options){
 			recursiveOptions[k] = options[k];
 	}
 	
-	var rootlessCand = addPhiWrapped(gen(leaves, recursiveOptions), options, rcat);
+	var rootlessCand = addPhiWrapped(gen(leaves, recursiveOptions, rcat), options, rcat);
 	
 	var candidates = [];
 	for(var i=0; i<rootlessCand.length; i++){
@@ -106,7 +106,7 @@ function iotafy(candidate, options, rcat){
 	}
 	if (options && options.obeysExhaustivity && !obeysExhaustivity(rcat.nextHigher, candidate))
 		return null;
-	return {id: rcat.nextHigher, cat: rcat.nextHigher, children: candidate}; // Should only get one node from rcat.nextHigher (check this section if breaking occurs)
+	return {id: pCat.nextHigher(rcat), cat: pCat.nextHigher(rcat), children: candidate}; // Should only get one node from rcat.nextHigher (check this section if breaking occurs)
 }
 
 function omegafy(word, rcat){
@@ -114,13 +114,13 @@ function omegafy(word, rcat){
 	{
 		throw "Warning: " + rcat + " is already lowest category. Problem with omegafying." // error statement if rcat is lowest category
 	}
-	return {id: word, cat: rcat.nextLower};
+	return {id: word, cat: pCat.nextLower(rcat)};
 }
 
 // conceptually, returns all possible parenthesizations of leaves that don't have a set of parentheses enclosing all of the leaves
 // format: returns an array of parenthesizations, where each parenthesization is an array of children, where each child is
 // either a phi node (with descendant nodes attached) or a leaf
-function gen(leaves, options){
+function gen(leaves, options, rcat){
 	var candidates = [];	//each candidate will be an array of siblings
 	if(!(leaves instanceof Array))
 		throw new Error(leaves+" is not a list of leaves.");	
@@ -136,7 +136,7 @@ function gen(leaves, options){
 	//Recursive case: at least 1 word. Consider all candidates where the first i words are grouped together
 	for(var i = 1; i <= leaves.length; i++){
 	
-		var rightsides = addPhiWrapped(gen(leaves.slice(i, leaves.length), options), options, rcat);
+		var rightsides = addPhiWrapped(gen(leaves.slice(i, leaves.length), options, rcat), options, rcat);
 
 		//Case 1: the first i leaves attach directly to parent (no phi wrapping)
 	
@@ -157,7 +157,7 @@ function gen(leaves, options){
 	
 		//Case 2: the first i words are wrapped in a phi
 		if(i<leaves.length){
-			var phiLeftsides = gen(leaves.slice(0,i), options);
+			var phiLeftsides = gen(leaves.slice(0,i), options, rcat);
 			for(var k = 0; k<phiLeftsides.length; k++)
 			{
 				var phiNode = phiify(phiLeftsides[k], options, rcat);
