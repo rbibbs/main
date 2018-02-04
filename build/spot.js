@@ -1162,8 +1162,9 @@ var wNum = 0;
 
 //R/N Update
 //takes a list of words and returns the candidate set of trees (JS objects)
-window.GEN = function(sTree, words, rcat, options){
+window.GEN = function(sTree, words, options){
 	options = options || {}; // if options is undefined, set it to an empty object (so you can query its properties without crashing things)
+	options.recursiveCat = (options.recursiveCat || "phi");
 	
 	if(typeof words === "string") { // words can be a space-separated string of words or an array of words; if string, split up into an array
 		if (!words) { // if empty, scrape words from sTree
@@ -1182,20 +1183,20 @@ window.GEN = function(sTree, words, rcat, options){
 	var leaves = [];
 	phiNum = wNum = 0;
 	for(var i=0; i<words.length; i++){
-		leaves.push(omegafy(words[i], rcat));
+		leaves.push(omegafy(words[i], options));
 	}
 	
 	var recursiveOptions = {};
 	for (var k in options) {
-		if (options.hasOwnProperty(k) && k !== 'requirePhiStem') // <-- redefine this in terms of rcat
+		if (options.hasOwnProperty(k) && k !== 'requirePhiStem') // <-- redefine this in terms of recursiveCat
 			recursiveOptions[k] = options[k];
 	}
 	
-	var rootlessCand = addPhiWrapped(gen(leaves, recursiveOptions), options, rcat);
+	var rootlessCand = addPhiWrapped(gen(leaves, recursiveOptions), options);
 	
 	var candidates = [];
 	for(var i=0; i<rootlessCand.length; i++){
-		var iota = iotafy(rootlessCand[i], options, rcat);
+		var iota = iotafy(rootlessCand[i], options);
 		if (!iota)
 			continue;
 		if (options.obeysHeadedness && !iotaIsHeaded(iota))
@@ -1232,26 +1233,28 @@ function obeysExhaustivity(cat, children) {
 	return true;
 }
 
-function iotafy(candidate, options, rcat){
-	if (pCat.indexOf(rcat) == -1)
+function iotafy(candidate, options){
+	var recursiveCat = options.recursiveCat;
+	if (pCat.indexOf(recursiveCat) == -1)
 	{
-		throw "Warning: " + rcat + " is not in prosodic hierarchy. Problem with iotafying."; // error statement if rcat is not w/in prosodic hierarchy
+		throw "Warning: " + recursiveCat + " is not in prosodic hierarchy. Problem with iotafying."; // error statement if recursiveCat is not w/in prosodic hierarchy
 	}
-	if (pCat.indexOf(rcat) == 0)
+	if (pCat.indexOf(recursiveCat) == 0)
 	{
-		throw "Warning: " + rcat + " is highest category. Problem with iotafying."; // error statement if rcat is highest category
+		throw "Warning: " + recursiveCat + " is highest category. Problem with iotafying."; // error statement if recursiveCat is highest category
 	}
-	if (options && options.obeysExhaustivity && !obeysExhaustivity(rcat.nextHigher, candidate))
+	var higherCat = pCat.nextHigher(recursiveCat);
+	if (options && options.obeysExhaustivity && !obeysExhaustivity(higherCat, candidate))
 		return null;
-	return {id: rcat.nextHigher, cat: rcat.nextHigher, children: candidate}; // Should only get one node from rcat.nextHigher (check this section if breaking occurs)
+	return {id: higherCat, cat: higherCat, children: candidate}; // Should only get one node from higherCat (check this section if breaking occurs)
 }
 
-function omegafy(word, rcat){
-	if (pCat.indexOf(rcat) == pCat.length - 1)
+function omegafy(word, options){
+	if (pCat.indexOf(options.recursiveCat) == pCat.length - 1)
 	{
-		throw "Warning: " + rcat + " is already lowest category. Problem with omegafying." // error statement if rcat is lowest category
+		throw "Warning: " + options.recursiveCat + " is already lowest category. Problem with omegafying." // error statement if recursiveCat is lowest category
 	}
-	return {id: word, cat: rcat.nextLower};
+	return {id: word, cat: pCat.nextLower(options.recursiveCat)};
 }
 
 // conceptually, returns all possible parenthesizations of leaves that don't have a set of parentheses enclosing all of the leaves
@@ -1268,12 +1271,12 @@ function gen(leaves, options){
 		return candidates;
 	}
 
-
+	var recursiveCat = options.recursiveCat;
 
 	//Recursive case: at least 1 word. Consider all candidates where the first i words are grouped together
 	for(var i = 1; i <= leaves.length; i++){
 	
-		var rightsides = addPhiWrapped(gen(leaves.slice(i, leaves.length), options), options, rcat);
+		var rightsides = addPhiWrapped(gen(leaves.slice(i, leaves.length), options), options);
 
 		//Case 1: the first i leaves attach directly to parent (no phi wrapping)
 	
@@ -1283,7 +1286,7 @@ function gen(leaves, options){
 		
 		//Combine the all-leaf leftside with all the possible rightsides that have a phi at their left edge (or are empty)
 		for(var j = 0; j<rightsides.length; j++){
-			if(!rightsides[j].length || rightsides[j][0].cat === rcat)
+			if(!rightsides[j].length || rightsides[j][0].cat === recursiveCat)
 			{
 				var cand = leftside.concat(rightsides[j]);
 				candidates.push(cand);
@@ -1297,7 +1300,7 @@ function gen(leaves, options){
 			var phiLeftsides = gen(leaves.slice(0,i), options);
 			for(var k = 0; k<phiLeftsides.length; k++)
 			{
-				var phiNode = phiify(phiLeftsides[k], options, rcat);
+				var phiNode = phiify(phiLeftsides[k], options);
 				if (!phiNode)
 					continue;
 				var leftside = [phiNode];
@@ -1314,19 +1317,20 @@ function gen(leaves, options){
 
 	return candidates;
 }
-//Done replacing 'phi' with rcat
-function phiify(candidate, options, rcat){
-	if (options && options.obeysExhaustivity && !obeysExhaustivity(rcat, candidate)) // not doing anything yet, because there's nothing between phi and w
+//Done replacing 'phi' with recursiveCat
+function phiify(candidate, options){
+	var recursiveCat = options.recursiveCat;
+	if (options.obeysExhaustivity && !obeysExhaustivity(recursiveCat, candidate)) // not doing anything yet, because there's nothing between phi and w
 		return null;
-	if (options && options.obeysNonrecursivity)
+	if (options.obeysNonrecursivity)
 		for (var i = 0; i < candidate.length; i++)
-			if (candidate[i].cat === rcat)
+			if (candidate[i].cat === recursiveCat)
 				return null;
-	return {id: rcat+(phiNum++), cat: rcat, children: candidate};
+	return {id: recursiveCat+(phiNum++), cat: recursiveCat, children: candidate};
 }
 
 //Takes a list of candidates and doubles it to root each of them in a phi
-function addPhiWrapped(candidates, options, rcat){
+function addPhiWrapped(candidates, options){
 	var origLen = candidates.length;
 	var result = [];
 	if (!options.requirePhiStem) {
@@ -1334,7 +1338,7 @@ function addPhiWrapped(candidates, options, rcat){
 	}
 	for(var i=0; i<origLen; i++){
 		if(candidates[i].length) {
-			var phiNode = phiify(candidates[i], options, rcat);
+			var phiNode = phiify(candidates[i], options);
 			if (phiNode)
 				result.push([phiNode]);
 		}
@@ -1822,7 +1826,7 @@ function catsMatch(aCat, bCat){
 
 
 //defines the prosodic hierarchy
-var pCat = ["i", "phi", "w"];
+var pCat = ["i", "phi", "w", "F"];
 
 //Function that compares two prosodic categories and returns whether cat1 is higher in the prosodic hierarchy than cat2
 pCat.isHigher = function (cat1, cat2){
