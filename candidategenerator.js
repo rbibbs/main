@@ -70,18 +70,18 @@ window.GEN = function(sTree, words, options){
 }
 
 function iotaIsHeaded(pnode) {
-	if (pCat.indexOf(pnode) == -1)
+	if (pCat.indexOf(pnode.cat) == -1)
 	{
-		throw "Warning: " + pnode + " is not in prosodic hierarchy. Problems checking for headedness."; // error statement if pnode is not w/in prosodic hierarchy
+		throw "Warning: " + pnode.cat + " is not in prosodic hierarchy. Problems checking for headedness."; // error statement if pnode.cat is not w/in prosodic hierarchy
 	}
 	var children = pnode.children || [];
-	if (pCat.indexOf(pnode) == pCat.length - 1)
+	if (pCat.indexOf(pnode.cat) == pCat.length - 1)
 	{
 		return true;
 	}
 	else
 	{	
-	var nextcat = pCat.indexOf(pnode) + 1;
+	var nextcat = pCat.indexOf(pnode.cat) + 1;
 	for (var i = 0; i < children.length; i++)
 		if (children[i].cat === nextcat)
 			return true;
