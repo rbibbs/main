@@ -1207,18 +1207,18 @@ window.GEN = function(sTree, words, options){
 }
 
 function iotaIsHeaded(pnode) {
-	if (pCat.indexOf(pnode.cat) == -1)
+	if (pCat.indexOf(pnode) == -1)
 	{
-		throw "Warning: " + pnode.cat + " is not in prosodic hierarchy. Problems checking for headedness."; // error statement if pnode.cat is not w/in prosodic hierarchy
+		throw "Warning: " + pnode + " is not in prosodic hierarchy. Problems checking for headedness."; // error statement if pnode is not w/in prosodic hierarchy
 	}
 	var children = pnode.children || [];
-	if (pCat.indexOf(pnode.cat) == pCat.length - 1)
+	if (pCat.indexOf(pnode) == pCat.length - 1)
 	{
 		return true;
 	}
 	else
 	{	
-	var nextcat = pCat.indexOf(pnode.cat) + 1;
+	var nextcat = pCat.indexOf(pnode) + 1;
 	for (var i = 0; i < children.length; i++)
 		if (children[i].cat === nextcat)
 			return true;
@@ -1508,6 +1508,7 @@ UTree.fromTerminals = function(terminalList) {
 	return new UTree(root);
 };
 
+
 function danishTrees() {
 	var patterns = [
 		[[{}],[{}]],
@@ -1698,6 +1699,19 @@ window.addEventListener('load', function(){
 
 	document.getElementById('danishJsonTreesButton').addEventListener('click', function() {
 		spotForm.sTree.value = JSON.stringify(danishTrees(), null, 4);
+	});
+
+	//Button to generate Truckenbrodt Tohono O'odham trees
+	document.getElementById('tohonoOodhamJsonTreesButton').addEventListener('click', function() {
+		spotForm.sTree.value = JSON.stringify(allTrucktrees, null, 4);
+	});
+
+	//Button to select all constraints for Truckenbrodt 1999 theory
+	document.getElementById('Truckconstraintsbutton').addEventListener('click',function() {
+		var myNodeList = document.querySelectorAll("input[value=wrap],input[value=nonRecTruckenbrodt],input[value=alignLeft]");
+	for (i = 0; i <	myNodeList.length; i++) {
+   	myNodeList[i].checked = !myNodeList[i].checked;
+	}
 	});
 	
 	treeTableContainer.addEventListener('input', function(e) {
