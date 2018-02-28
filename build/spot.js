@@ -1708,7 +1708,7 @@ window.addEventListener('load', function(){
 
 	//Button to select all constraints for Truckenbrodt 1999 theory
 	document.getElementById('Truckconstraintsbutton').addEventListener('click',function() {
-		var myNodeList = document.querySelectorAll("input[value=wrap],input[value=nonRecTruckenbrodt],input[value=alignLeft]");
+		var myNodeList = document.querySelectorAll("input[value=wrap],input[value=nonRecTruckenbrodt],input[value=alignRight]");
 	for (i = 0; i <	myNodeList.length; i++) {
    	myNodeList[i].checked = !myNodeList[i].checked;
 	}
