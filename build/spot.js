@@ -1706,6 +1706,12 @@ window.addEventListener('load', function(){
 		spotForm.sTree.value = JSON.stringify(allTrucktrees, null, 4);
 	});
 
+
+	//Button to generate Ito&Mester japanese trees
+	document.getElementById('Japanesetreesbutton').addEventListener('click', function() {
+		spotForm.sTree.value = JSON.stringify(japaneseTrees, null, 4);
+	});
+
 	//Button to select all constraints for Truckenbrodt 1999 theory
 	document.getElementById('Truckconstraintsbutton').addEventListener('click',function() {
 		var myNodeList = document.querySelectorAll("input[value=wrap],input[value=nonRecTruckenbrodt],input[value=alignRight]");
